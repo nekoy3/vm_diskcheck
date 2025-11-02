@@ -1,0 +1,27 @@
+# Example VM configuration file for vm_diskcheck
+# Copy this file to vms.yml and configure your VMs
+
+vms:
+  # Example VM with SSH key authentication
+  - name: "Web Server 1"
+    host: "192.168.1.10"
+    user: "admin"
+    port: 22
+    ssh_key: "/path/to/ssh/key"
+  
+  # Example VM with default settings (root user, port 22)
+  - name: "Database Server"
+    host: "192.168.1.20"
+    user: "root"
+  
+  # Example VM with custom port
+  - name: "Application Server"
+    host: "192.168.1.30"
+    user: "ubuntu"
+    port: 2222
+    ssh_key: "~/.ssh/id_rsa"
+  
+  # Example VM using hostname
+  - name: "Development Server"
+    host: "dev.example.com"
+    user: "devops"
