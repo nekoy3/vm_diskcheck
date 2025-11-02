@@ -108,6 +108,15 @@ vms:
         self.assertEqual(result['status'], 'error')
         self.assertIn('timeout', result['error'].lower())
     
+    def test_check_vm_disk_missing_host(self):
+        """Test handling of missing host parameter."""
+        checker = VMDiskChecker(self.config_file.name)
+        vm = {'name': 'Test VM', 'user': 'admin'}  # Missing host
+        result = checker.check_vm_disk(vm)
+        
+        self.assertEqual(result['status'], 'error')
+        self.assertIn('host', result['error'].lower())
+    
     @patch('subprocess.run')
     def test_check_all_vms(self, mock_run):
         """Test checking all VMs."""

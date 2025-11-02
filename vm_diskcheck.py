@@ -58,6 +58,15 @@ class VMDiskChecker:
         name = vm.get('name', host)
         ssh_key = vm.get('ssh_key', '')
         
+        # Validate required parameters
+        if not host:
+            return {
+                'name': name or 'Unknown',
+                'host': 'N/A',
+                'status': 'error',
+                'error': 'Missing required parameter: host'
+            }
+        
         # Construct SSH command
         ssh_cmd = ['ssh', '-o', 'StrictHostKeyChecking=no', '-o', 'ConnectTimeout=10']
         
@@ -92,16 +101,28 @@ class VMDiskChecker:
                 if line:
                     parts = line.split()
                     if len(parts) >= 6:
-                        usage_percent = int(parts[4].rstrip('%'))
-                        disks.append({
-                            'device': parts[0],
-                            'size': parts[1],
-                            'used': parts[2],
-                            'available': parts[3],
-                            'usage_percent': usage_percent,
-                            'mount': parts[5],
-                            'warning': usage_percent >= self.threshold
-                        })
+                        try:
+                            # Parse usage percentage, handling various formats
+                            usage_str = parts[4].rstrip('%')
+                            usage_percent = int(usage_str)
+                            
+                            # Handle potential multi-line device names by taking the last 6 fields
+                            if len(parts) > 6:
+                                parts = parts[-6:]
+                            
+                            disks.append({
+                                'device': parts[0],
+                                'size': parts[1],
+                                'used': parts[2],
+                                'available': parts[3],
+                                'usage_percent': usage_percent,
+                                'mount': parts[5],
+                                'warning': usage_percent >= self.threshold
+                            })
+                        except (ValueError, IndexError) as e:
+                            # Skip malformed lines but log to stderr
+                            print(f"Warning: Failed to parse disk line: {line}", file=sys.stderr)
+                            continue
             
             return {
                 'name': name,
